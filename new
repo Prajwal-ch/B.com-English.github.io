@@ -1,0 +1,7 @@
+/* 📱 Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: row;
+                align-items: center;
+                height: auto;
+            }

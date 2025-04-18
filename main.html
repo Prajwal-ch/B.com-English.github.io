@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance System</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>    
+<style>
+    /* Google Font */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+     * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+     body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200vh;
+            background-image: url(students\ attend.jpg);
+            background-size: cover;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+            background: none;
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            text-align: center;
+            border-radius: 15px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .input-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-box input {
+            width: 100%;
+            padding: 12px;
+            padding-left: 40px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+
+        .input-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        select,
+        input,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 98%;
+            margin-top: 25px;
+            padding: none;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            width: 85%;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .button-group button {
+            flex: 1;
+            margin: 5px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .select-all {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+
+        #submit-btn {
+            background-color: #157ff1;
+            color: white;
+            width: 90%;
+        }
+
+        #submit-btn1{
+            padding-left: 10px;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 100px) {
+
+            table,
+            th,
+            td {
+                width: 80%;
+                padding-right: none;
+               font-size: 14px;
+            }
+        }
+
+</style>
+</head>
+<body>
+    <div class="container">
+        <h2>Attendance System</h2>
+    
+        <label for="section">Select Course:</label>
+        <select id="section" onchange="loadStudents()">
+            <option value="">Select Course</option>
+            <option value="B_com">B.com</option>
+        </select>
+    
+        <label for="date">Date:</label>
+        <input type="date" id="date" placeholder="DD-MM-YYYY">
+
+        <label for="time">Class Time(Range)</label>
+        <input type="time" id="startTime" placeholder="HH:MM"> to <input type="time" id="endTime" placeholder="HH:MM">
+
+        <table id="attendanceTable">
+            <thead>
+                <tr>
+                    <th>USN</th>
+                    <th>Name</th>
+                    <th><button class="select-all" onclick="selectAll()">Select All as Present</button></th>
+                </tr>
+            </thead>
+            <tbody id="studentList">
+                <!-- Student rows will be inserted here dynamically -->
+            </tbody>
+        </table>
+    <div id="submit-btn1">
+        <button onclick="submitAttendance()" id="submit-btn">Submit Attendance</button>
+    </div>
+    </div>
+</body>
+
+<script>
+     const studentsData = {
+            "B_com": [
+            { usn: "U03NK24S0026", name: "Darshan S D" },
+            { usn: "U03NK24S0027", name: "Suresh" },
+            { usn: "U03NK24S0028", name: "Suhel" },
+            { usn: "U03NK24S0029", name: "Manoj" },
+            { usn: "U03NK24S0030", name: "Mahanandish C" },
+            { usn: "U03NK24S0031", name: "Arvind S" },
+            { usn: "U03NK24S0032", name: "Sunil S" },
+            { usn: "U03NK24S0033", name: "Mothilal N" },
+            { usn: "U03NK24S0034", name: "Gireesh Khane" },
+            { usn: "U03NK24S0035", name: "Chethan S" },
+            { usn: "U03NK24S0036", name: "Mohammed Muzakkir" },
+            { usn: "U03NK24S0037", name: "Manoj K" },
+            { usn: "U03NK24S0038", name: "RAVIKUMAR RAMESH HADAPAD" },
+            { usn: "U03NK24S0039", name: "V Deepali" },
+            { usn: "U03NK24S0040", name: "B.Meghana" },
+            { usn: "U03NK24S0041", name: "Chinmayi H M" },
+            { usn: "U03NK24S0042", name: "Hemanth Aradhya N" },
+            { usn: "U03NK24S0043", name: "Keerthan G" },
+            { usn: "U03NK24S0044", name: "Kishore K" },
+            { usn: "U03NK24S0045", name: "Monisha N" },
+            { usn: "U03NK24S0046", name: "Nuthan H N" },
+            { usn: "U03NK24S0047", name: "Pavan H G" },
+            { usn: "U03NK24S0048", name: "Priyanka J" },
+            { usn: "U03NK24S0049", name: "Rachana R" },
+            { usn: "U03NK24S0050", name: "Rithuja M" },
+            { usn: "U03NK24S0051", name: "Samresh S" },
+            { usn: "U03NK24S0052", name: "Santosh" },
+            { usn: "U03NK24S0053", name: "Shashikala M" },
+            { usn: "U03NK24S0054", name: "Shravani C R" },
+            { usn: "U03NK24S0055", name: "Shreyas" },
+            { usn: "U03NK24S0056", name: "Siddappa Nayaka" },
+            { usn: "U03NK24S0058", name: "Shashikala G E" },
+            { usn: "U03NK24S0059", name: "Savitri" },
+            { usn: "U03NK24S0060", name: "R Varsha" },
+            { usn: "U03NK24S0061", name: "Prarthana K C" },
+            { usn: "U03NK24S0062", name: "Shruthi R" },
+            { usn: "U03NK24S0063", name: "Bharath V" },
+            { usn: "U03NK24S0064", name: "Bhanukeerthi P" },
+            { usn: "U03NK24S0065", name: "Lalitha G S" },
+            { usn: "U03NK24S0066", name: "Pooja U" },
+            { usn: "U03NK24S0067", name: "Chethan Prasad B S" },
+            { usn: "U03NK24S0068", name: "Ananya Miraskar P" },
+            { usn: "U03NK24S0069", name: "D Pallavi" },
+            { usn: "U03NK24S0070", name: "Darshan G" },
+            { usn: "U03NK24S0071", name: "Divya B" },
+            { usn: "U03NK24S0072", name: "Divya Shree K" },
+            { usn: "U03NK24S0073", name: "Gagana M R" },
+            { usn: "U03NK24S0074", name: "Gowtham R" },
+            { usn: "U03NK24S0075", name: "Hemavathi C G" },
+            { usn: "U03NK24S0077", name: "K S Kusuma" },
+            { usn: "U03NK24S0078", name: "Kousalya S" },
+            { usn: "U03NK24S0079", name: "Lavanya M" },
+            { usn: "U03NK24S0080", name: "Mahesha M" },
+            { usn: "U03NK24S0081", name: "Manoj Reddy A" }
+            ],
+        };
+
+        function loadStudents() {
+            let section = document.getElementById("section").value;
+            let studentList = document.getElementById("studentList");
+            studentList.innerHTML = "";
+
+            if (studentsData[section]) {
+                studentsData[section].forEach(student => {
+                    let row = document.createElement("tr");
+                    row.innerHTML = `
+                    <td>${student.usn}</td>
+                    <td>${student.name}</td>
+                    <td><input type="checkbox" class="present-checkbox" data-usn="${student.usn}" data-name="${student.name}"></td>
+                `;
+                    studentList.appendChild(row);
+                });
+            }
+        }
+
+        function selectAll() {
+            let checkboxes = document.querySelectorAll(".present-checkbox");
+            checkboxes.forEach(checkbox => checkbox.checked = true);
+        }
+
+        function submitAttendance() {
+    let section = document.getElementById("section").value;
+    let date = document.getElementById("date").value;
+    let startTime = document.getElementById("startTime").value;
+    let endTime = document.getElementById("endTime").value;
+
+    if (!section || !date || !startTime || !endTime) {
+        alert("Please fill all details before submitting.");
+        return;
+    }
+
+    let attendanceData = {
+        sheetId: "17xpN08Us-U7XGxlxIetAFHzzc-yxiFfU3DsqaXI1IRg", // Google Sheet ID
+        sheetName: section, // Use dynamic section name as sheet name
+        section: section,
+        date: date,
+        time: `${startTime} - ${endTime}`,
+        students: []
+    };
+
+    let checkboxes = document.querySelectorAll(".present-checkbox");
+    checkboxes.forEach(checkbox => {
+        attendanceData.students.push({
+            usn: checkbox.getAttribute("data-usn"),
+            name: checkbox.getAttribute("data-name"),
+            present: checkbox.checked 
+        });
+    });
+
+    console.log("Submitting Attendance:", attendanceData);
+
+    fetch("https://script.google.com/macros/s/AKfycbwn4j-Tp8H7vNlq6uA6GLwWzTlOmxNNV--MresgW8W4v7NAnx35-MJzEgFFRxKCqI1UgQ/exec", {
+        method: "POST",
+        mode: "no-cors", // Avoid CORS issues
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(attendanceData)
+    })
+    .then(response => response.json())
+    .then((data) => console.log("Success:", data))
+  .catch((error) => console.error("Error:", error));
+
+            alert("✅ Attendance Submitted Successfully! Check Google Sheet.");
+        }
+</script>
+</html>

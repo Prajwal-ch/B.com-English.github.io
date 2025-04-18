@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check your Attendance</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('prajwal1.jpeg');
+            background-size: cover;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            margin: 50px auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        h2 {
+            color: white;
+        }
+
+        p {
+            color: white;
+        }
+
+        #h3 {
+            color: white;
+            padding-top: 25px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            text-align: left;
+            color: white;
+        }
+
+        input {
+            width: 95%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            width: 80%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 18px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .loader {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .loader img {
+            width: 50px;
+        }
+
+        #result {
+            margin-top: 20px;
+            text-align: left;
+            padding-inline: 5px;
+        }
+
+        #attendanceTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            display: none;
+            color: white;
+        }
+
+        #attendanceTable th, #attendanceTable td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        #attendanceTable th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+
+    <script>
+        async function fetchStudentData() {
+    var usn = document.getElementById("usn").value.trim();
+    var dob = document.getElementById("dob").value.trim();
+    var loader = document.getElementById("loader");
+    var resultDiv = document.getElementById("result");
+    var table = document.getElementById("attendanceTable");
+    var tableBody = table.querySelector("tbody");
+    var note = document.getElementById("note");
+
+    if (!usn || !dob) {
+        alert("Please enter both USN and Date of Birth.");
+        return;
+    }
+
+    loader.style.display = "block";
+    resultDiv.innerHTML = "";
+    tableBody.innerHTML = "";
+    note.style.display = "none";
+    table.style.display = "none";
+
+    var webAppUrl = "https://script.google.com/macros/s/AKfycbzsGXJiVW-tC9eoIBWTKbcP-uyqpQ5EIhCV6cPxYrvadzzsghGAAZ3CFC2xdiuvHaUSPw/exec";
+    var urlWithParams = `${webAppUrl}?usn=${encodeURIComponent(usn)}&dob=${encodeURIComponent(dob)}`;
+
+    try {
+        const response = await fetch(urlWithParams);
+        if (!response.ok) throw new Error("Network response was not ok");
+
+        const data = await response.json();
+        console.log("API Response:", data);
+
+        loader.style.display = "none";
+
+        if (data.error) {
+            resultDiv.innerHTML = `<p class='error'>${data.error}</p>`;
+            return;
+        }
+
+        let usnNumber = data["USN number"] || "N/A";
+        let name = data["Student Name"] || "N/A";
+        let overallPercentage = data["Overall Percentage"] || "N/A";
+
+        resultDiv.innerHTML = `
+            <h3 id="h3">Student Details</h3>
+            <p><b>USN:</b> ${usnNumber}</p>
+            <p><b>Name:</b> ${name}</p>
+            <p><b>Overall Percentage:</b> ${overallPercentage}</p>`;
+
+        let attendanceKeys = Object.keys(data).filter(key => !["USN number", "Student Name", "Overall Percentage"].includes(key));
+
+        if (attendanceKeys.length > 0) {
+            tableBody.innerHTML = "";
+            attendanceKeys.forEach(subject => {
+                let present = data[subject]?.["Present"] ?? 0;
+                let total = data[subject]?.["Total Classes"] ?? 0;
+                let absentDates = data[subject]?.["Absent Dates"] || [];
+                let formattedAbsentDates = absentDates.length > 0 ? absentDates.join("<br>") : "None";
+
+                tableBody.innerHTML += `<tr><td>${subject}</td><td>${present}</td><td>${total - present}</td><td>${total}</td><td>${formattedAbsentDates}</td></tr>`;
+            });
+
+            table.style.display = "table";
+
+            if (overallPercentage !== "N/A" && parseFloat(overallPercentage) < 75) {
+                note.style.display = "block";
+            }
+        }
+    } catch (error) {
+        loader.style.display = "none";
+        console.error("Fetch Error:", error);
+        resultDiv.innerHTML = `<p class='error'>Error fetching data. Please try again.</p>`;
+    }
+}
+
+    </script>
+
+</head>
+
+<body>
+    <div class="container">
+        <h2>Student Attendance Portal</h2>
+        <label for="usn"><p>Enter USN:</p></label>
+        <input type="text" id="usn" placeholder="e.g., U03NK24S0***" required>
+        <label for="dob"><p>Date of Birth (DD-MM-YYYY):</p></label>
+        <input type="text" id="dob" placeholder="e.g., DD-MM-YYYY" required>
+
+        <button onclick="fetchStudentData()">Submit</button>
+
+        <div class="loader" id="loader"><img src="https://i.gifer.com/ZZ5H.gif"></div>
+
+        <div id="result"></div>
+
+        <p id="note" style="display: none;">🔴 <b>75% attendance is required to appear for exams.</b></p>
+
+        <table id="attendanceTable">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Present</th>
+                    <th>Absent</th>
+                    <th>Total Classes</th>
+                    <th>Absent Dates</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+</body>
+
+</html>
